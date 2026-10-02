@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>เข้าสู่ระบบ — Q-Care</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container nav">
+    <a class="brand" href="index.html">Q<em>-Care</em></a>
+    <nav class="nav-actions">
+      <a class="btn-nav ghost" href="register.html">สมัครสมาชิก</a>
+    </nav>
+  </div>
+</header>
+
+<main class="content container">
+
+  <!-- Hero -->
+  <section class="hero" style="padding-bottom:14px;">
+    <h2>เข้าสู่ระบบ Q-Care</h2>
+    <p>จองคิวตรวจโรงพยาบาลจากที่บ้าน ติดตามสถานะคิวแบบ Real-time พร้อมแจ้งเตือนเมื่อใกล้ถึงคิวของคุณ</p>
+  </section>
+
+  <!-- POST /api/auth/login -->
+  <div class="card auth-card">
+    <h1>เข้าสู่ระบบ</h1>
+    <p class="subtitle">ใช้เบอร์โทรศัพท์และรหัสผ่านที่ลงทะเบียนไว้</p>
+
+    <form id="form-login" novalidate>
+      <label for="login-phone">เบอร์โทรศัพท์</label>
+      <input id="login-phone" type="tel" inputmode="numeric" maxlength="10" placeholder="08xxxxxxxx" required />
+
+      <label for="login-pass">รหัสผ่าน</label>
+      <input id="login-pass" type="password" autocomplete="current-password" required />
+
+      <p id="login-error" class="error-msg"></p>
+      <button class="btn" type="submit">เข้าสู่ระบบ</button>
+    </form>
+
+    <p class="meta center" style="margin-top:14px;">
+      ยังไม่มีบัญชี? <a href="register.html"><b>สมัครสมาชิก</b></a><br>
+      บัญชี Admin ทดสอบ: <b>0812345678 / admin1234</b>
+    </p>
+
+    <!-- POST /api/auth/otp/verify → ได้ JWT กลับมา (เฉพาะบัญชีที่ยังไม่ยืนยัน OTP) -->
+    <div id="otp-block" class="hidden">
+      <h1>ยืนยันตัวตน (OTP)</h1>
+      <p class="subtitle">กรอกรหัส 6 หลักที่ส่งไปยัง <b id="otp-phone"></b></p>
+
+      <!-- ระบบจริงจะไม่มี banner นี้ (OTP ส่งทาง SMS/Email) -->
+      <div class="otp-banner">
+        [โหมดจำลอง: SMS ถูกแทนที่ด้วยข้อความนี้]
+        <span class="otp-code" id="otp-dev-code"></span>
+      </div>
+
+      <form id="form-otp" novalidate>
+        <input id="otp-input" type="text" inputmode="numeric" maxlength="6"
+               placeholder="______" style="text-align:center; font-size:1.5rem; letter-spacing:10px; font-weight:700;" />
+        <p id="otp-error" class="error-msg"></p>
+        <button class="btn" type="submit">ยืนยันตัวตน</button>
+      </form>
+
+      <p class="meta center" style="margin-top:14px;">ส่งรหัสใหม่ได้ในอีก <b id="otp-countdown">60</b> วินาที</p>
+      <button id="btn-resend" class="btn btn-outline" type="button" disabled>ส่งรหัส OTP ใหม่</button>
+    </div>
+  </div>
+</main>
+
+<footer>Q-Care — Smart Hospital Queue Management · Prototype สำหรับการศึกษา</footer>
+<div id="toast-wrap"></div>
+
+<script src="js/data.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>

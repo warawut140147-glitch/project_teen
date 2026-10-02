@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>จองคิว — Q-Care</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container nav">
+    <a class="brand" href="index.html">Q<em>-Care</em></a>
+    <nav class="nav-actions">
+      <a class="btn-nav" href="patient.html">จองคิว</a>
+      <a class="btn-nav ghost" href="queue.html">ดูคิว</a>
+      <span class="nav-user" id="nav-user"></span>
+      <button class="btn-nav ghost" id="btn-logout" type="button">ออกจากระบบ</button>
+    </nav>
+  </div>
+</header>
+
+<main class="content container narrow">
+  <!-- ฟอร์มจองคิว (render ด้วย js/patient.js) -->
+  <div class="card" id="booking-card"></div>
+</main>
+
+<footer>Q-Care — Smart Hospital Queue Management · Prototype สำหรับการศึกษา</footer>
+<div id="toast-wrap"></div>
+
+<script src="js/data.js"></script>
+<script src="js/patient.js"></script>
+</body>
+</html>

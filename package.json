@@ -1,0 +1,10 @@
+{
+  "name": "qcare-prototype",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Q-Care — Smart Hospital Queue Management (Prototype)",
+  "scripts": {
+    "start": "npx --yes serve website",
+    "dev": "npx --yes serve website"
+  }
+}

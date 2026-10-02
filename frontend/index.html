@@ -1,0 +1,1090 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Q-Care — ระบบจองคิวโรงพยาบาลอัจฉริยะ</title>
+<style>
+  :root {
+    --primary: #0284c7; --primary-dark: #0369a1;
+    --bg: #f0f9ff; --card: #fff; --text: #0f172a; --muted: #64748b;
+    --success: #16a34a; --warning: #d97706; --danger: #dc2626; --radius: 14px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: "Segoe UI", "Leelawadee UI", Tahoma, sans-serif;
+    background: var(--bg); color: var(--text); min-height: 100vh;
+    display: flex; justify-content: center; padding: 24px 16px;
+  }
+  .app { width: 100%; max-width: 480px; }
+  .app.wide { max-width: 960px; }
+  .card {
+    background: var(--card); border-radius: var(--radius); padding: 24px;
+    box-shadow: 0 4px 16px rgba(15,23,42,.08); margin-bottom: 16px;
+  }
+  h1 { font-size: 1.3rem; text-align: center; color: var(--primary-dark); margin-bottom: 4px; }
+  .subtitle { text-align: center; color: var(--muted); font-size: .9rem; margin-bottom: 18px; }
+  label { display: block; font-size: .85rem; font-weight: 600; margin: 12px 0 6px; }
+  input, select {
+    width: 100%; padding: 11px 14px; border: 1.5px solid #cbd5e1;
+    border-radius: 10px; font-size: 1rem; outline: none; background: #fff;
+  }
+  input:focus, select:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(2,132,199,.15); }
+  .small { width: auto; padding: 7px 10px; font-size: .85rem; display: inline-block; }
+  .btn {
+    width: 100%; padding: 12px; margin-top: 14px; border: none; border-radius: 10px;
+    cursor: pointer; font-size: 1rem; font-weight: 700; color: #fff;
+    background: var(--primary); transition: background .2s;
+  }
+  .btn:hover { background: var(--primary-dark); }
+  .btn:disabled { background: #94a3b8; cursor: not-allowed; }
+  .btn-sm {
+    width: auto; padding: 6px 12px; margin: 2px 2px 0 0; font-size: .78rem;
+    border-radius: 8px; display: inline-block;
+  }
+  .btn-outline { background: #fff; color: var(--primary); border: 1.5px solid var(--primary); }
+  .btn-outline:hover { background: #e0f2fe; }
+  .btn-danger { background: var(--danger); }
+  .btn-success { background: var(--success); }
+  .btn-gray { background: var(--muted); }
+  .hidden { display: none !important; }
+  .error-msg { color: var(--danger); font-size: .85rem; margin-top: 8px; min-height: 1.2em; text-align: center; }
+  .meta { color: var(--muted); font-size: .85rem; }
+  .center { text-align: center; }
+
+  .tabs { display: flex; gap: 8px; margin-bottom: 6px; }
+  .tab { flex: 1; padding: 10px; border: none; border-radius: 10px; background: #e0f2fe; font-weight: 600; cursor: pointer; }
+  .tab.active { background: var(--primary); color: #fff; }
+
+  .otp-banner {
+    background: #fef9c3; border: 1px dashed #ca8a04; padding: 12px;
+    border-radius: 10px; text-align: center; font-size: .9rem; margin-bottom: 12px;
+  }
+  .otp-code { font-size: 1.7rem; font-weight: 800; letter-spacing: 8px; color: #854d0e; display: block; margin-top: 4px; }
+
+  .queue-number { font-size: 4rem; font-weight: 800; text-align: center; color: var(--primary-dark); line-height: 1.1; }
+  .status-badge {
+    display: inline-block; padding: 5px 14px; border-radius: 999px;
+    font-size: .78rem; font-weight: 700; color: #fff; white-space: nowrap;
+  }
+  .st-waiting   { background: var(--warning); }
+  .st-called    { background: var(--success); }
+  .st-skipped   { background: var(--danger); }
+  .st-completed, .st-cancelled { background: var(--muted); }
+  .pulse { animation: pulse 1.2s ease-in-out infinite; }
+  @keyframes pulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+  .flash { animation: flash .9s ease; }
+  @keyframes flash { 0% { background: #dcfce7; } 100% { background: transparent; } }
+
+  .dept-row {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 10px 4px; border-bottom: 1px solid #e2e8f0;
+  }
+  .dept-row:last-child { border-bottom: none; }
+  .serving { font-size: 1.4rem; font-weight: 800; color: var(--primary); }
+  .live-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--success); animation: pulse 1.2s infinite; margin: 0 6px 0 2px; }
+  .topbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; gap: 8px; flex-wrap: wrap; }
+  .link-btn { background: none; border: none; color: var(--primary); font-weight: 700; cursor: pointer; font-size: .9rem; }
+
+  .sec-title {
+    font-weight: 800; font-size: 1.02rem; margin-bottom: 10px;
+    color: var(--primary-dark); border-bottom: 2px solid #e2e8f0; padding-bottom: 6px;
+  }
+  .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; }
+  .stat { background: #e0f2fe; border-radius: 10px; padding: 14px 8px; text-align: center; }
+  .stat-num { font-size: 1.7rem; font-weight: 800; color: var(--primary-dark); }
+  .stat-lbl { font-size: .8rem; color: var(--muted); }
+
+  .tbl-wrap { overflow-x: auto; }
+  .tbl { width: 100%; border-collapse: collapse; font-size: .85rem; }
+  .tbl th, .tbl td { padding: 8px 6px; border-bottom: 1px solid #e2e8f0; text-align: left; vertical-align: middle; }
+  .tbl th { background: #f8fafc; color: var(--muted); font-size: .78rem; }
+  .qn { font-weight: 800; color: var(--primary-dark); }
+
+  .dept-item { border: 1px solid #e2e8f0; border-radius: 10px; padding: 12px; margin-bottom: 10px; }
+  .dept-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .desk-chip { display: inline-block; background: #e0f2fe; border-radius: 999px; padding: 3px 10px; font-size: .78rem; margin: 3px 4px 0 0; }
+  .desk-chip button { background: none; border: none; color: var(--danger); cursor: pointer; font-weight: 700; }
+  .inline-form { display: flex; gap: 8px; margin-top: 8px; flex-wrap: wrap; }
+  .inline-form input { flex: 1; min-width: 120px; }
+
+  #toast-wrap { position: fixed; top: 16px; right: 16px; z-index: 99; width: 300px; }
+  .toast {
+    background: #0f172a; color: #fff; padding: 12px 16px; border-radius: 10px;
+    margin-bottom: 8px; box-shadow: 0 6px 20px rgba(0,0,0,.25); font-size: .88rem;
+    animation: slideIn .3s ease;
+  }
+  @keyframes slideIn { from { transform: translateX(40px); opacity: 0; } to { transform: none; opacity: 1; } }
+
+  .history-item { display: flex; justify-content: space-between; padding: 8px 4px; border-bottom: 1px dashed #e2e8f0; font-size: .88rem; }
+</style>
+</head>
+<body>
+<div id="toast-wrap"></div>
+<div class="app" id="app-shell">
+
+  <!-- ================= VIEW: AUTH (Register / Login) ================= -->
+  <section id="view-auth">
+    <div class="card">
+      <h1>Q-Care — จองคิวโรงพยาบาล</h1>
+      <p class="subtitle">ยืนยันตัวตนด้วย OTP ก่อนจองคิว ปลอดภัย ไร้บอทสแปม</p>
+
+      <div class="tabs">
+        <button class="tab active" id="tab-register" type="button">สมัครสมาชิก</button>
+        <button class="tab" id="tab-login" type="button">เข้าสู่ระบบ</button>
+      </div>
+
+      <!-- POST /api/auth/register -->
+      <form id="form-register" novalidate>
+        <label for="reg-name">ชื่อ-นามสกุล</label>
+        <input id="reg-name" type="text" autocomplete="name" required />
+
+        <label for="reg-nid">เลขบัตรประชาชน (13 หลัก)</label>
+        <input id="reg-nid" type="text" inputmode="numeric" maxlength="13" required />
+
+        <label for="reg-phone">เบอร์โทรศัพท์ (รับ OTP)</label>
+        <input id="reg-phone" type="tel" inputmode="numeric" maxlength="10" placeholder="08xxxxxxxx" required />
+
+        <label for="reg-pass">รหัสผ่าน (อย่างน้อย 8 ตัวอักษร)</label>
+        <input id="reg-pass" type="password" autocomplete="new-password" required />
+
+        <p id="reg-error" class="error-msg"></p>
+        <button class="btn" type="submit">สมัครสมาชิกและขอรหัส OTP</button>
+      </form>
+
+      <!-- POST /api/auth/login -->
+      <form id="form-login" class="hidden" novalidate>
+        <label for="login-phone">เบอร์โทรศัพท์</label>
+        <input id="login-phone" type="tel" inputmode="numeric" maxlength="10" required />
+
+        <label for="login-pass">รหัสผ่าน</label>
+        <input id="login-pass" type="password" autocomplete="current-password" required />
+
+        <p id="login-error" class="error-msg"></p>
+        <button class="btn" type="submit">เข้าสู่ระบบ</button>
+        <p class="meta center" style="margin-top:12px;">บัญชี Admin ทดสอบ: <b>0812345678 / admin1234</b></p>
+      </form>
+    </div>
+  </section>
+
+  <!-- ================= VIEW: OTP (Mock-up Verification) ================= -->
+  <!-- จริง: POST /api/auth/otp/verify → ได้ JWT กลับมา -->
+  <section id="view-otp" class="hidden">
+    <div class="card">
+      <h1>ยืนยันตัวตน (OTP)</h1>
+      <p class="subtitle">กรอกรหัส 6 หลักที่ส่งไปยัง <b id="otp-phone"></b></p>
+
+      <!-- ระบบจริงจะไม่มี banner นี้ (OTP ส่งทาง SMS/Email) -->
+      <div class="otp-banner">
+        [โหมดจำลอง: SMS ถูกแทนที่ด้วยข้อความนี้]
+        <span class="otp-code" id="otp-dev-code"></span>
+      </div>
+
+      <form id="form-otp" novalidate>
+        <input id="otp-input" type="text" inputmode="numeric" maxlength="6"
+               placeholder="______" style="text-align:center; font-size:1.5rem; letter-spacing:10px; font-weight:700;" />
+        <p id="otp-error" class="error-msg"></p>
+        <button class="btn" type="submit">ยืนยันตัวตน</button>
+      </form>
+
+      <p class="meta center" style="margin-top:14px;">ส่งรหัสใหม่ได้ในอีก <b id="otp-countdown">60</b> วินาที</p>
+      <button id="btn-resend" class="btn btn-outline" type="button" disabled>ส่งรหัส OTP ใหม่</button>
+    </div>
+  </section>
+
+  <!-- ================= VIEW: PATIENT ================= -->
+  <section id="view-patient" class="hidden">
+    <div class="topbar">
+      <span><b id="welcome-name"></b></span>
+      <button id="btn-logout-p" class="link-btn" type="button">ออกจากระบบ</button>
+    </div>
+
+    <!-- คิวของฉัน + ฟอร์มจองคิว -->
+    <div class="card" id="my-queue-card"></div>
+
+    <!-- กระดานคิว + ประวัติ -->
+    <div class="card">
+      <p style="font-weight:700;"><span class="live-dot"></span>สถานะคิวแต่ละแผนก (Real-time)</p>
+      <p class="meta" style="margin:4px 0 8px;">อัปเดตล่าสุด: <span id="last-updated">-</span> · ดึงข้อมูลใหม่ทุก 2.5 วินาที</p>
+      <div id="dept-board"></div>
+      <button id="btn-history" class="btn btn-outline" type="button">ดูประวัติการจองคิว</button>
+      <div id="history-box" class="hidden" style="margin-top:12px;"></div>
+    </div>
+  </section>
+
+  <!-- ================= VIEW: ADMIN DASHBOARD ================= -->
+  <section id="view-admin" class="hidden">
+    <div class="topbar">
+      <span><b id="admin-name"></b> <span class="meta">(เจ้าหน้าที่)</span></span>
+      <span>
+        <label class="meta"><input type="checkbox" id="demo-mode" style="width:auto;" /> โหมดสาธิตเรียกคิวอัตโนมัติ</label>
+        <button id="btn-logout-a" class="link-btn" type="button">ออกจากระบบ</button>
+      </span>
+    </div>
+
+    <!-- (Read) Dashboard ภาพรวม -->
+    <div class="card">
+      <div class="sec-title">ภาพรวมผู้ป่วยในระบบ (วันนี้)</div>
+      <div class="stats-grid" id="stats"></div>
+    </div>
+
+    <!-- (Update/Delete) จัดการคิว -->
+    <div class="card">
+      <div class="sec-title">จัดการคิว — เรียกคิว / เสร็จสิ้น / ข้ามคิว / ยกเลิก</div>
+      <select id="admin-dept-filter" class="small"></select>
+      <div class="tbl-wrap" style="margin-top:10px;" id="admin-queues"></div>
+    </div>
+
+    <!-- (CRUD) แผนก + โต๊ะตรวจ -->
+    <div class="card">
+      <div class="sec-title">จัดการแผนกและโต๊ะตรวจ (CRUD)</div>
+      <div class="inline-form">
+        <input id="dept-new-name" type="text" placeholder="ชื่อแผนกใหม่" />
+        <input id="dept-new-prefix" type="text" maxlength="1" placeholder="ตัวอักษรคิว (A-Z)" style="max-width:120px;" />
+        <button id="btn-add-dept" class="btn btn-sm" type="button" style="margin-top:0;">เพิ่มแผนก</button>
+      </div>
+      <p id="dept-error" class="error-msg" style="text-align:left;"></p>
+      <div id="dept-manager" style="margin-top:12px;"></div>
+    </div>
+
+    <!-- (Delete) แบนผู้ใช้ -->
+    <div class="card">
+      <div class="sec-title">จัดการผู้ใช้ — แบนผู้ใช้ที่จองคิวเล่นซ้ำซาก</div>
+      <div class="tbl-wrap" id="user-manager"></div>
+    </div>
+  </section>
+</div>
+
+<script>
+'use strict';
+
+/* =====================================================================
+ * Q-Care Prototype — Single-file Web App (Vanilla JS)
+ * ---------------------------------------------------------------------
+ * - Mock Backend อยู่ในออบเจ็กต์ `api`: ทุก method มีคอมเมนต์กำกับ
+ *   Endpoint จริง — เมื่อต่อ Backend ให้แทน body ด้วย fetch()
+ *   พร้อม Header: Authorization: Bearer <JWT> และบังคับใช้ HTTPS
+ * - Real-time: poll ข้อมูลทุก 2.5 วิ → Partial Render เฉพาะ DOM ที่เกี่ยวข้อง
+ *   (อนาคตเปลี่ยนเป็น WebSocket/SSE ได้ที่ฟังก์ชัน startPolling)
+ * - Log การใช้งาน (จำลอง MongoDB collection activity_logs) อยู่ที่ addLog()
+ * ===================================================================== */
+
+// ---------- Helpers ----------
+const $ = (sel) => document.querySelector(sel);
+const delay = (ms) => new Promise((r) => setTimeout(r, ms));
+const numOf = (q) => parseInt(q.number.split('-')[1], 10);
+const fmt = (n) => String(n).padStart(3, '0');
+const maskNid = (nid) => nid.replace(/^(\d{5})\d{6}(\d{2})$/, '$1xxxxxx$2');
+const STATUS_TH = {
+  waiting: 'รออยู่', called: 'เรียกแล้ว', in_service: 'กำลังตรวจ',
+  skipped: 'ถูกข้าม', completed: 'เสร็จสิ้น', cancelled: 'ยกเลิก',
+};
+const badge = (st) => `<span class="status-badge st-${st}">${STATUS_TH[st]}</span>`;
+
+// ---------- State ----------
+const state = {
+  token: null,         // mock JWT (จริง: เก็บใน localStorage + HttpOnly cookie ฝั่ง server)
+  user: null,
+  pendingPhone: null,  // เบอร์ที่กำลังรอยืนยัน OTP
+  departments: [], desks: [], queues: [], patients: [],
+  myQueue: null, prevStatus: null, notifiedNear: false,
+  showHistory: false, adminDeptFilter: 'all',
+  selectedDesk: {},    // { queueId: deskId } คงค่า dropdown ตอน re-render
+};
+
+// ---------- Mock Database (ฝั่ง Backend จำลอง) ----------
+const db = {
+  users: [
+    // บัญชี Admin ทดสอบ (ระบบจริง: password ต้องเป็น hash)
+    { id: 'admin-1', fullName: 'เจ้าหน้าที่ รพ.', nationalId: '1000000000001',
+      phone: '0812345678', password: 'admin1234', role: 'admin', isVerified: true, isBanned: false },
+  ],
+  otps: [],
+  departments: [
+    { id: 'd1', name: 'แผนกอายุรกรรม',    description: 'ตรวจโรคทั่วไป', prefix: 'A', isActive: true, nextNumber: 12, nowServing: 9 },
+    { id: 'd2', name: 'แผนกทันตกรรม',     description: 'ทันตกรรมและช่องปาก', prefix: 'B', isActive: true, nextNumber: 8, nowServing: 5 },
+    { id: 'd3', name: 'แผนกกุมารเวชกรรม', description: 'ตรวจโรคเด็ก', prefix: 'C', isActive: true, nextNumber: 6, nowServing: 6 },
+  ],
+  desks: [
+    { id: 'k1', departmentId: 'd1', name: 'โต๊ะตรวจ 1', isActive: true },
+    { id: 'k2', departmentId: 'd1', name: 'โต๊ะตรวจ 2', isActive: true },
+    { id: 'k3', departmentId: 'd2', name: 'โต๊ะตรวจ 1', isActive: true },
+    { id: 'k4', departmentId: 'd3', name: 'โต๊ะตรวจ 1', isActive: true },
+  ],
+  queues: [],
+  logs: [], // จำลอง MongoDB collection: activity_logs
+};
+
+// เติมคิวผู้ป่วยจำลอง (ไม่ระบุตัวตน) ให้ระบบมีข้อมูลตั้งแต่เปิดหน้าเว็บ
+db.departments.forEach((d) => {
+  for (let n = d.nowServing + 1; n < d.nextNumber; n++) {
+    db.queues.push({
+      id: 'q-' + d.prefix + n,
+      number: `${d.prefix}-${fmt(n)}`,
+      patientId: 'guest-' + d.prefix + n,
+      departmentId: d.id, deskId: null,
+      status: 'waiting', createdAt: Date.now(),
+    });
+  }
+});
+
+// จำลองการเขียน log ลง MongoDB (db/activity_logs)
+function addLog(action, detail) {
+  const entry = { at: new Date().toISOString(), actorId: state.user?.id || 'anonymous', action, detail };
+  db.logs.push(entry);
+  console.log('[activity_logs]', entry);
+}
+
+// =====================================================================
+// API Layer — จำลอง RESTful Backend (สลับเป็น fetch() จริงตาม endpoint)
+// =====================================================================
+const api = {
+  // POST /api/auth/register  { fullName, nationalId, phone, password }
+  async register({ fullName, nationalId, phone, password }) {
+    await delay(400);
+    if (db.users.some((u) => u.phone === phone))           throw new Error('เบอร์โทรนี้ถูกใช้งานแล้ว');
+    if (db.users.some((u) => u.nationalId === nationalId)) throw new Error('เลขบัตรประชาชนนี้ถูกใช้งานแล้ว');
+    const user = {
+      id: crypto.randomUUID(), fullName, nationalId, phone,
+      password, // จริง: Backend ต้อง hash ด้วย bcrypt ก่อนบันทึก
+      role: 'patient', isVerified: false, isBanned: false,
+    };
+    db.users.push(user);
+    addLog('register', `ลงทะเบียนใหม่: ${fullName}`);
+    return this.requestOtp(phone);
+  },
+
+  // POST /api/auth/login  { phone, password } → { token } หรือ { needsOtp: true }
+  async login(phone, password) {
+    await delay(350);
+    const u = db.users.find((u) => u.phone === phone && u.password === password);
+    if (!u) { addLog('login_failed', `พยายามเข้าสู่ระบบ: ${phone}`); throw new Error('เบอร์โทรหรือรหัสผ่านไม่ถูกต้อง'); }
+    if (u.isBanned) throw new Error('บัญชีนี้ถูกระงับการใช้งาน');
+    if (!u.isVerified) return { needsOtp: true };
+    addLog('login', `เข้าสู่ระบบ: ${u.fullName} (${u.role})`);
+    return { token: this.issueToken(u), user: u };
+  },
+
+  // POST /api/auth/otp/request  { phone } — จริง: ส่ง SMS/Email ผ่านผู้ให้บริการ
+  async requestOtp(phone) {
+    await delay(300);
+    const code = String(Math.floor(100000 + Math.random() * 900000));
+    db.otps.push({ phone, code, expiresAt: Date.now() + 5 * 60 * 1000, used: false });
+    return { ok: true, devCode: code }; // devCode: ไม่มีในระบบจริง (จำลอง SMS)
+  },
+
+  // POST /api/auth/otp/verify  { phone, code } → { token }
+  async verifyOtp(phone, code) {
+    await delay(400);
+    const otp = db.otps.find((o) => o.phone === phone && o.code === code && !o.used);
+    if (!otp) throw new Error('รหัส OTP ไม่ถูกต้อง');
+    if (Date.now() > otp.expiresAt) throw new Error('รหัส OTP หมดอายุ กรุณาขอรหัสใหม่');
+    otp.used = true;
+    const user = db.users.find((u) => u.phone === phone);
+    user.isVerified = true; // UPDATE users SET is_verified = TRUE
+    addLog('otp_verify', `ยืนยันตัวตนสำเร็จ: ${user.fullName}`);
+    return { token: this.issueToken(user), user };
+  },
+
+  // GET /api/queues  → { departments, desks, queues } (จริง: กรองตาม JWT role)
+  async getQueues() {
+    await delay(150);
+    const nameOf = (pid) => db.users.find((u) => u.id === pid)?.fullName || 'ผู้ป่วย (ไม่ระบุตัวตน)';
+    return {
+      departments: db.departments,
+      desks: db.desks,
+      queues: db.queues.map((q) => ({ ...q, patientName: nameOf(q.patientId) })),
+    };
+  },
+
+  // POST /api/queues  { departmentId } — ผู้ป่วยจองคิว (Create)
+  async createQueue(departmentId) {
+    await delay(350);
+    const user = state.user;
+    if (user.isBanned) throw new Error('บัญชีของคุณถูกระงับการใช้งาน');
+    const dept = db.departments.find((d) => d.id === departmentId);
+    if (!dept || !dept.isActive) throw new Error('แผนกนี้ไม่ได้เปิดให้บริการ');
+    const dup = db.queues.find(
+      (q) => q.patientId === user.id && q.departmentId === departmentId &&
+             ['waiting', 'called'].includes(q.status)
+    );
+    if (dup) throw new Error('คุณมีคิวรออยู่ในแผนกนี้แล้ว'); // partial unique index ฝั่ง DB
+    const queue = {
+      id: crypto.randomUUID(),
+      number: `${dept.prefix}-${fmt(dept.nextNumber++)}`,
+      patientId: user.id, departmentId, deskId: null,
+      status: 'waiting', createdAt: Date.now(),
+    };
+    db.queues.push(queue);
+    addLog('queue_create', `จองคิว ${queue.number} (${dept.name})`);
+    return queue;
+  },
+
+  // PUT /api/queues/:id  { status, deskId } — Admin เรียกคิว/เปลี่ยนสถานะ (Update)
+  async updateQueueStatus(id, status, deskId) {
+    await delay(180);
+    const q = db.queues.find((q) => q.id === id);
+    if (!q) throw new Error('ไม่พบคิวนี้');
+    const dept = db.departments.find((d) => d.id === q.departmentId);
+    q.status = status;
+    if (status === 'called') {
+      q.deskId = deskId ||
+        db.desks.find((k) => k.departmentId === q.departmentId && k.isActive)?.id || null;
+      q.calledAt = Date.now();
+      dept.nowServing = numOf(q);
+    }
+    if (status === 'completed') q.completedAt = Date.now();
+    addLog('queue_update', `คิว ${q.number} → ${status}`);
+    return q;
+  },
+
+  // DELETE /api/queues/:id — ผู้ป่วยยกเลิกคิวตัวเอง หรือ Admin ยกเลิกแทน
+  async cancelQueue(id) {
+    await delay(250);
+    const q = db.queues.find((q) => q.id === id);
+    if (q && ['waiting', 'called'].includes(q.status)) {
+      q.status = 'cancelled';
+      addLog('queue_cancel', `ยกเลิกคิว ${q.number}`);
+    }
+    return { ok: true };
+  },
+
+  // PATCH /api/users/:id/ban  { banned } — Admin แบน/ปลดแบน
+  async setUserBanned(id, banned) {
+    await delay(200);
+    const u = db.users.find((u) => u.id === id);
+    if (u) {
+      u.isBanned = banned;
+      if (banned) { // แบนแล้วเชิดคิวที่ค้างอยู่ทิ้งด้วย
+        db.queues.forEach((q) => {
+          if (q.patientId === id && ['waiting', 'called'].includes(q.status)) q.status = 'cancelled';
+        });
+      }
+      addLog(banned ? 'user_ban' : 'user_unban', `${u.fullName}`);
+    }
+    return { ok: true };
+  },
+
+  // GET /api/users?role=patient — Admin ดูรายชื่อผู้ป่วย
+  async getUsers() {
+    await delay(120);
+    return db.users.filter((u) => u.role === 'patient').map((u) => ({
+      id: u.id, fullName: u.fullName, phone: u.phone,
+      nationalId: u.nationalId, isVerified: u.isVerified, isBanned: u.isBanned,
+      queueCount: db.queues.filter((q) => q.patientId === u.id).length,
+    }));
+  },
+
+  // POST /api/departments — Admin เพิ่มแผนก
+  async addDepartment({ name, description, prefix }) {
+    await delay(200);
+    if (db.departments.some((d) => d.name === name))  throw new Error('มีแผนกชื่อนี้อยู่แล้ว');
+    if (!/^[A-Z]$/.test(prefix))                       throw new Error('ตัวอักษรนำหน้าคิวต้องเป็น A-Z 1 ตัว');
+    const d = { id: crypto.randomUUID(), name, description, prefix, isActive: true, nextNumber: 1, nowServing: 0 };
+    db.departments.push(d);
+    addLog('department_create', name);
+    return d;
+  },
+
+  // PUT /api/departments/:id — Admin แก้ไขแผนก
+  async updateDepartment(id, { name, description }) {
+    await delay(180);
+    const d = db.departments.find((d) => d.id === id);
+    if (!d) throw new Error('ไม่พบแผนก');
+    d.name = name || d.name;
+    d.description = description ?? d.description;
+    addLog('department_update', d.name);
+    return d;
+  },
+
+  // DELETE /api/departments/:id — Admin ลบแผนก (ห้ามถ้ามีคิวค้าง)
+  async deleteDepartment(id) {
+    await delay(180);
+    const active = db.queues.filter(
+      (q) => q.departmentId === id && ['waiting', 'called'].includes(q.status)
+    ).length;
+    if (active) throw new Error(`ลบไม่ได้: แผนกนี้มีคิวค้างอยู่ ${active} รายการ`);
+    db.departments = db.departments.filter((d) => d.id !== id);
+    db.desks = db.desks.filter((k) => k.departmentId !== id); // ON DELETE CASCADE
+    addLog('department_delete', id);
+    return { ok: true };
+  },
+
+  // PATCH /api/departments/:id/active — เปิด/ปิดให้บริการ
+  async toggleDepartment(id) {
+    const d = db.departments.find((d) => d.id === id);
+    if (d) { d.isActive = !d.isActive; addLog('department_toggle', `${d.name} = ${d.isActive}`); }
+    return d;
+  },
+
+  // POST /api/desks  { departmentId, name } — Admin เพิ่มโต๊ะตรวจ
+  async addDesk(departmentId, name) {
+    await delay(150);
+    if (!name.trim()) throw new Error('กรุณาระบุชื่อโต๊ะตรวจ');
+    const k = { id: crypto.randomUUID(), departmentId, name: name.trim(), isActive: true };
+    db.desks.push(k);
+    addLog('desk_create', name);
+    return k;
+  },
+
+  // DELETE /api/desks/:id — Admin ลบโต๊ะตรวจ
+  async deleteDesk(id) {
+    await delay(150);
+    db.desks = db.desks.filter((k) => k.id !== id); // จริง: FK SET NULL ที่ queues.desk_id
+    addLog('desk_delete', id);
+    return { ok: true };
+  },
+
+  // จำลองการออก JWT (จริง: Backend sign ด้วย HS256/RS256 + refresh token)
+  issueToken(user) {
+    return btoa(JSON.stringify({ sub: user.id, role: user.role, iat: Date.now() }));
+  },
+};
+
+// =====================================================================
+// View Management + Toast แจ้งเตือน
+// =====================================================================
+function showView(id) {
+  ['view-auth', 'view-otp', 'view-patient', 'view-admin'].forEach((v) => $('#' + v).classList.add('hidden'));
+  $('#' + id).classList.remove('hidden');
+}
+
+function showToast(title, body) {
+  const t = document.createElement('div');
+  t.className = 'toast';
+  t.innerHTML = `<b>${title}</b><div class="meta" style="color:#cbd5e1;">${body}</div>`;
+  $('#toast-wrap').appendChild(t);
+  setTimeout(() => t.remove(), 5000);
+}
+
+// Notification: toast บนหน้าเว็บ + Web Notification API (ถ้าอนุญาต)
+function notify(title, body) {
+  showToast(title, body);
+  if ('Notification' in window && Notification.permission === 'granted') {
+    new Notification(title, { body });
+  }
+}
+
+// =====================================================================
+// AUTH: Register / Login / OTP
+// =====================================================================
+$('#tab-register').addEventListener('click', () => switchTab(true));
+$('#tab-login').addEventListener('click', () => switchTab(false));
+function switchTab(isRegister) {
+  $('#tab-register').classList.toggle('active', isRegister);
+  $('#tab-login').classList.toggle('active', !isRegister);
+  $('#form-register').classList.toggle('hidden', !isRegister);
+  $('#form-login').classList.toggle('hidden', isRegister);
+}
+
+$('#form-register').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const err = $('#reg-error');
+  err.textContent = '';
+  const data = {
+    fullName:   $('#reg-name').value.trim(),
+    nationalId: $('#reg-nid').value.trim(),
+    phone:      $('#reg-phone').value.trim(),
+    password:   $('#reg-pass').value,
+  };
+  if (!/^[0-9]{13}$/.test(data.nationalId)) { err.textContent = 'เลขบัตรประชาชนต้องเป็นตัวเลข 13 หลัก'; return; }
+  if (!/^0[0-9]{9}$/.test(data.phone))      { err.textContent = 'เบอร์โทรต้องขึ้นต้นด้วย 0 และมี 10 หลัก'; return; }
+  if (data.password.length < 8)             { err.textContent = 'รหัสผ่านต้องมีอย่างน้อย 8 ตัวอักษร'; return; }
+  try {
+    const res = await api.register(data);
+    enterOtpView(data.phone, res.devCode);
+  } catch (ex) { err.textContent = ex.message; }
+});
+
+$('#form-login').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const err = $('#login-error');
+  err.textContent = '';
+  try {
+    const res = await api.login($('#login-phone').value.trim(), $('#login-pass').value);
+    if (res.needsOtp) {
+      const otp = await api.requestOtp($('#login-phone').value.trim());
+      enterOtpView($('#login-phone').value.trim(), otp.devCode);
+      return;
+    }
+    enterApp(res.token, res.user);
+  } catch (ex) { err.textContent = ex.message; }
+});
+
+// ---------- OTP (Mock-up Verification) ----------
+let otpTimer = null;
+
+function enterOtpView(phone, devCode) {
+  state.pendingPhone = phone;
+  $('#otp-phone').textContent = phone;
+  $('#otp-dev-code').textContent = devCode;
+  $('#otp-input').value = '';
+  $('#otp-error').textContent = '';
+  showView('view-otp');
+  startCountdown(60);
+  $('#otp-input').focus();
+}
+
+function startCountdown(sec) {
+  clearInterval(otpTimer);
+  const btn = $('#btn-resend');
+  btn.disabled = true;
+  $('#otp-countdown').textContent = sec;
+  otpTimer = setInterval(() => {
+    sec--;
+    $('#otp-countdown').textContent = Math.max(sec, 0);
+    if (sec <= 0) { clearInterval(otpTimer); btn.disabled = false; }
+  }, 1000);
+}
+
+$('#btn-resend').addEventListener('click', async () => {
+  const res = await api.requestOtp(state.pendingPhone);
+  $('#otp-dev-code').textContent = res.devCode;
+  startCountdown(60);
+});
+
+$('#form-otp').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const err = $('#otp-error');
+  err.textContent = '';
+  const code = $('#otp-input').value.trim();
+  if (!/^[0-9]{6}$/.test(code)) { err.textContent = 'กรุณากรอกรหัส OTP 6 หลัก'; return; }
+  try {
+    const res = await api.verifyOtp(state.pendingPhone, code);
+    clearInterval(otpTimer);
+    enterApp(res.token, res.user);
+  } catch (ex) { err.textContent = ex.message; }
+});
+
+// ---------- Enter App / Logout (เลือก view ตาม role) ----------
+function enterApp(token, user) {
+  state.token = token;
+  state.user = user;
+  state.prevStatus = null;
+  state.notifiedNear = false;
+  $('#app-shell').classList.toggle('wide', user.role === 'admin');
+  if (user.role === 'admin') {
+    $('#admin-name').textContent = user.fullName;
+    showView('view-admin');
+  } else {
+    $('#welcome-name').textContent = user.fullName;
+    showView('view-patient');
+    if ('Notification' in window && Notification.permission === 'default') {
+      Notification.requestPermission();
+    }
+  }
+  refresh();
+  startPolling();
+}
+
+function doLogout() {
+  addLog('logout', state.user?.fullName || '');
+  state.token = null; state.user = null; state.myQueue = null;
+  clearInterval(pollTimer); pollTimer = null;
+  clearInterval(demoTimer); demoTimer = null;
+  $('#demo-mode').checked = false;
+  showView('view-auth');
+}
+$('#btn-logout-p').addEventListener('click', doLogout);
+$('#btn-logout-a').addEventListener('click', doLogout);
+
+// =====================================================================
+// Real-time: poll ทุก 2.5 วิ → Partial Render
+// =====================================================================
+let pollTimer = null;
+
+function startPolling() {
+  if (pollTimer) return;
+  pollTimer = setInterval(refresh, 2500);
+}
+
+async function refresh() {
+  if (!state.user) return;
+  const data = await api.getQueues(); // GET /api/queues
+  state.departments = data.departments;
+  state.desks = data.desks;
+  state.queues = data.queues;
+
+  if (state.user.role === 'admin') {
+    state.patients = await api.getUsers(); // GET /api/users?role=patient
+    renderStats();
+    renderAdminQueues();
+    renderDeptManager();
+    renderUsers();
+  } else {
+    state.myQueue =
+      state.queues.find((q) => q.patientId === state.user.id && ['waiting', 'called'].includes(q.status)) ||
+      state.queues
+        .filter((q) => q.patientId === state.user.id)
+        .sort((a, b) => b.createdAt - a.createdAt)[0] || null;
+    renderMyQueue();
+    renderBoard();
+    if (state.showHistory) renderHistory();
+  }
+  $('#last-updated').textContent = new Date().toLocaleTimeString('th-TH');
+}
+
+// =====================================================================
+// PATIENT: คิวของฉัน + จองคิว + ยกเลิก + แจ้งเตือนใกล้ถึงคิว
+// =====================================================================
+function renderMyQueue() {
+  const el = $('#my-queue-card');
+  const q = state.myQueue;
+  if (state.user.isBanned) {
+    el.innerHTML = `
+      <h1>บัญชีถูกระงับ</h1>
+      <p class="subtitle">บัญชีของคุณถูกระงับการใช้งาน กรุณาติดต่อเจ้าหน้าที่</p>`;
+    return;
+  }
+
+  // ยังไม่มีคิว → ฟอร์มจองคิว (Create)
+  if (!q) {
+    state.prevStatus = null; state.notifiedNear = false;
+    const activeDepts = state.departments.filter((d) => d.isActive);
+    el.innerHTML = `
+      <h1>จองคิวตรวจ</h1>
+      <p class="subtitle">คุณยังไม่มีคิวที่ใช้งานอยู่</p>
+      <label for="book-dept">เลือกแผนก</label>
+      <select id="book-dept">
+        ${activeDepts.map((d) => `<option value="${d.id}">${d.name}</option>`).join('') ||
+          '<option value="">ไม่มีแผนกเปิดให้บริการ</option>'}
+      </select>
+      <button id="btn-book" class="btn" type="button">จองคิว</button>
+      <p id="book-error" class="error-msg"></p>`;
+    $('#btn-book').addEventListener('click', async () => {
+      try {
+        await api.createQueue($('#book-dept').value); // POST /api/queues
+        await refresh();
+        showToast('จองคิวสำเร็จ', 'ระบบจะแจ้งเตือนเมื่อใกล้ถึงคิวของคุณ');
+      } catch (ex) { $('#book-error').textContent = ex.message; }
+    });
+    return;
+  }
+
+  const dept = state.departments.find((d) => d.id === q.departmentId);
+  const ahead = state.queues.filter(
+    (x) => x.departmentId === q.departmentId && ['waiting', 'called'].includes(x.status) && numOf(x) < numOf(q)
+  ).length;
+
+  // แจ้งเตือน: ถึงคิว / ใกล้ถึงคิว (เหลือ ≤ 2 คิว)
+  if (state.prevStatus && state.prevStatus !== 'called' && q.status === 'called') {
+    notify('ถึงคิวของคุณแล้ว!', `คิว ${q.number} — ${dept.name} กรุณาไปที่โต๊ะตรวจ`);
+  } else if (q.status === 'waiting' && ahead <= 2 && !state.notifiedNear) {
+    notify('ใกล้ถึงคิวของคุณแล้ว', `คิว ${q.number} เหลืออีก ${ahead} คิว — กรุณาเตรียมตัว`);
+    state.notifiedNear = true;
+  }
+  if (q.status === 'waiting' && ahead > 2) state.notifiedNear = false;
+
+  let badgeText = 'รออยู่', badgeCls = 'st-waiting', extra = `เหลืออีก ${ahead} คิว · จำนวนคิวรอทั้งหมด ${ahead} คิว`;
+  let pulse = '';
+  if (q.status === 'called') {
+    const desk = state.desks.find((k) => k.id === q.deskId);
+    badgeText = 'เรียกคิวแล้ว — กรุณาเข้าที่โต๊ะตรวจ';
+    badgeCls = 'st-called';
+    extra = 'โต๊ะตรวจ: ' + (desk ? desk.name : 'รอ Assign') + ' (จาก PUT /api/queues/:id)';
+    pulse = 'pulse';
+  } else if (q.status === 'skipped') {
+    badgeText = 'ถูกข้ามคิว'; badgeCls = 'st-skipped'; extra = 'กรุณาติดต่อเจ้าหน้าที่';
+  } else if (q.status === 'completed') {
+    badgeText = 'เสร็จสิ้น'; badgeCls = 'st-completed'; extra = 'ขอบคุณที่ใช้บริการ';
+  } else if (q.status === 'cancelled') {
+    badgeText = 'ยกเลิกแล้ว'; badgeCls = 'st-cancelled'; extra = '';
+  }
+
+  el.innerHTML = `
+    <h1>คิวของฉัน · ${dept.name}</h1>
+    <p class="subtitle">หมายเลขคิวของคุณ</p>
+    <div class="queue-number ${pulse}">${q.number}</div>
+    <p class="center" style="margin:10px 0 6px;">
+      <span class="status-badge ${badgeCls}">${badgeText}</span>
+    </p>
+    <p class="meta center">${extra}</p>
+    ${['waiting', 'called'].includes(q.status)
+      ? '<button id="btn-cancel" class="btn btn-danger" type="button">ยกเลิกคิว</button>'
+      : '<button id="btn-rebook" class="btn btn-outline" type="button">จองคิวใหม่</button>'}`;
+
+  // กระพริบการ์ดเมื่อสถานะเปลี่ยน (เห็นชัดว่า DOM อัปเดตแบบ Real-time)
+  if (state.prevStatus && state.prevStatus !== q.status) {
+    el.classList.remove('flash'); void el.offsetWidth; el.classList.add('flash');
+  }
+  state.prevStatus = q.status;
+
+  const cancel = $('#btn-cancel');
+  if (cancel) cancel.addEventListener('click', async () => {
+    if (!confirm('ยืนยันการยกเลิกคิว ' + q.number + '?')) return;
+    await api.cancelQueue(q.id); // DELETE /api/queues/:id
+    await refresh();
+  });
+  const rebook = $('#btn-rebook');
+  if (rebook) rebook.addEventListener('click', () => { state.myQueue = null; renderMyQueue(); });
+}
+
+function renderBoard() {
+  $('#dept-board').innerHTML = state.departments.filter((d) => d.isActive).map((d) => {
+    const waiting = state.queues.filter((q) => q.departmentId === d.id && q.status === 'waiting').length;
+    const called = state.queues.find((q) => q.departmentId === d.id && q.status === 'called');
+    const serving = called ? called.number : `${d.prefix}-${fmt(d.nowServing)}`;
+    return `
+      <div class="dept-row">
+        <div><b>${d.name}</b><br><span class="meta">กำลังรอ ${waiting} คิว</span></div>
+        <div class="serving">${serving}</div>
+      </div>`;
+  }).join('') || '<p class="meta center">ไม่มีแผนกเปิดให้บริการ</p>';
+}
+
+// ---------- ประวัติการจองคิว (Read) ----------
+$('#btn-history').addEventListener('click', () => {
+  state.showHistory = !state.showHistory;
+  $('#btn-history').textContent = state.showHistory ? 'ซ่อนประวัติการจองคิว' : 'ดูประวัติการจองคิว';
+  $('#history-box').classList.toggle('hidden', !state.showHistory);
+  if (state.showHistory) renderHistory();
+});
+
+function renderHistory() {
+  const mine = state.queues
+    .filter((q) => q.patientId === state.user.id)
+    .sort((a, b) => b.createdAt - a.createdAt);
+  $('#history-box').innerHTML = mine.length
+    ? mine.map((q) => {
+        const d = state.departments.find((x) => x.id === q.departmentId);
+        return `
+          <div class="history-item">
+            <span><b class="qn">${q.number}</b> · ${d ? d.name : '-'}<br>
+              <span class="meta">${new Date(q.createdAt).toLocaleString('th-TH')}</span></span>
+            ${badge(q.status)}
+          </div>`;
+      }).join('')
+    : '<p class="meta center">ยังไม่มีประวัติการจองคิว</p>';
+}
+
+// =====================================================================
+// ADMIN DASHBOARD
+// =====================================================================
+
+// ---------- (Read) สถิติภาพรวม ----------
+function renderStats() {
+  const today = state.queues;
+  const waiting = today.filter((q) => q.status === 'waiting').length;
+  const called = today.filter((q) => q.status === 'called').length;
+  const done = today.filter((q) => ['completed', 'skipped'].includes(q.status)).length;
+  const stats = [
+    { num: waiting, lbl: 'ผู้ป่วยรอเรียกคิว' },
+    { num: called,  lbl: 'กำลังเรียก/ตรวจ' },
+    { num: done,    lbl: 'เสร็จสิ้นวันนี้' },
+    { num: state.patients.length, lbl: 'ผู้ป่วยลงทะเบียน' },
+  ];
+  $('#stats').innerHTML = stats.map(
+    (s) => `<div class="stat"><div class="stat-num">${s.num}</div><div class="stat-lbl">${s.lbl}</div></div>`
+  ).join('');
+}
+
+// ---------- (Update/Delete) ตารางจัดการคิว ----------
+$('#admin-dept-filter').addEventListener('change', (e) => {
+  state.adminDeptFilter = e.target.value;
+  renderAdminQueues();
+});
+
+function renderAdminQueues() {
+  // filter dropdown
+  const filter = $('#admin-dept-filter');
+  const opts = ['<option value="all">ทุกแผนก</option>']
+    .concat(state.departments.map((d) => `<option value="${d.id}" ${d.id === state.adminDeptFilter ? 'selected' : ''}>${d.name}</option>`));
+  if (filter.innerHTML !== opts.join('')) filter.innerHTML = opts.join('');
+
+  const active = ['waiting', 'called'];
+  const rows = state.queues
+    .filter((q) => active.includes(q.status))
+    .filter((q) => state.adminDeptFilter === 'all' || q.departmentId === state.adminDeptFilter)
+    .sort((a, b) => (a.departmentId > b.departmentId ? 1 : -1) || (numOf(a) - numOf(b)));
+
+  $('#admin-queues').innerHTML = `
+    <table class="tbl">
+      <thead><tr>
+        <th>คิว</th><th>ผู้ป่วย</th><th>แผนก</th><th>สถานะ</th><th>การดำเนินการ</th>
+      </tr></thead>
+      <tbody>
+        ${rows.map((q) => {
+          const dept = state.departments.find((d) => d.id === q.departmentId);
+          const desks = state.desks.filter((k) => k.departmentId === q.departmentId && k.isActive);
+          const actions = q.status === 'called'
+            ? `<button class="btn btn-sm btn-success"  data-action="complete" data-id="${q.id}">เสร็จสิ้น</button>
+               <button class="btn btn-sm btn-gray"     data-action="cancel"   data-id="${q.id}">ยกเลิก</button>`
+            : `<select class="small desk-select" data-id="${q.id}" title="เลือกโต๊ะตรวจ">
+                 ${desks.map((k) => `<option value="${k.id}" ${state.selectedDesk[q.id] === k.id ? 'selected' : ''}>${k.name}</option>`).join('')}
+               </select>
+               <button class="btn btn-sm"              data-action="call"     data-id="${q.id}">เรียกคิว</button>
+               <button class="btn btn-sm btn-danger"   data-action="skip"     data-id="${q.id}">ข้ามคิว</button>
+               <button class="btn btn-sm btn-gray"     data-action="cancel"   data-id="${q.id}">ยกเลิก</button>`;
+          return `<tr>
+            <td class="qn">${q.number}</td>
+            <td>${q.patientName}</td>
+            <td>${dept ? dept.name : '-'}</td>
+            <td>${badge(q.status)}</td>
+            <td>${actions}</td>
+          </tr>`;
+        }).join('') || '<tr><td colspan="5" class="meta center">ไม่มีคิวรออยู่</td></tr>'}
+      </tbody>
+    </table>`;
+}
+
+// Event delegation สำหรับปุ่มจัดการคิว
+$('#admin-queues').addEventListener('change', (e) => {
+  if (e.target.matches('.desk-select')) state.selectedDesk[e.target.dataset.id] = e.target.value;
+});
+$('#admin-queues').addEventListener('click', async (e) => {
+  const btn = e.target.closest('button[data-action]');
+  if (!btn) return;
+  const { action, id } = btn.dataset;
+  try {
+    if (action === 'call')    await api.updateQueueStatus(id, 'called', state.selectedDesk[id]); // PUT /api/queues/:id
+    if (action === 'complete') await api.updateQueueStatus(id, 'completed');
+    if (action === 'skip')    await api.updateQueueStatus(id, 'skipped');
+    if (action === 'cancel') {
+      if (!confirm('ยืนยันการยกเลิกคิวนี้?')) return;
+      await api.cancelQueue(id); // DELETE /api/queues/:id
+    }
+    await refresh();
+  } catch (ex) { showToast('เกิดข้อผิดพลาด', ex.message); }
+});
+
+// ---------- (CRUD) แผนก + โต๊ะตรวจ ----------
+$('#btn-add-dept').addEventListener('click', async () => {
+  const err = $('#dept-error');
+  err.textContent = '';
+  try {
+    await api.addDepartment({
+      name: $('#dept-new-name').value.trim(),
+      description: '',
+      prefix: $('#dept-new-prefix').value.trim().toUpperCase(),
+    });
+    $('#dept-new-name').value = ''; $('#dept-new-prefix').value = '';
+    await refresh();
+    showToast('สำเร็จ', 'เพิ่มแผนกใหม่แล้ว');
+  } catch (ex) { err.textContent = ex.message; }
+});
+
+function renderDeptManager() {
+  $('#dept-manager').innerHTML = state.departments.map((d) => {
+    const desks = state.desks.filter((k) => k.departmentId === d.id);
+    const waiting = state.queues.filter((q) => q.departmentId === d.id && q.status === 'waiting').length;
+    return `
+      <div class="dept-item">
+        <div class="dept-head">
+          <div>
+            <b>${d.name}</b> <span class="meta">[คิว ${d.prefix}-xxx]</span>
+            ${d.isActive ? '' : '<span class="status-badge st-cancelled">ปิดให้บริการ</span>'}
+            <br><span class="meta">${d.description || '-'} · คิวรอ ${waiting} · โต๊ะตรวจ ${desks.length} โต๊ะ</span>
+          </div>
+          <div>
+            <button class="btn btn-sm btn-outline" data-daction="edit"   data-id="${d.id}">แก้ไข</button>
+            <button class="btn btn-sm btn-gray"    data-daction="toggle" data-id="${d.id}">${d.isActive ? 'ปิดใช้งาน' : 'เปิดใช้งาน'}</button>
+            <button class="btn btn-sm btn-danger"  data-daction="delete" data-id="${d.id}">ลบ</button>
+          </div>
+        </div>
+        <div>
+          ${desks.map((k) => `<span class="desk-chip">${k.name}<button data-kaction="del" data-id="${k.id}" title="ลบโต๊ะ">×</button></span>`).join('')}
+        </div>
+        <div class="inline-form">
+          <input type="text" placeholder="เพิ่มโต๊ะตรวจ เช่น โต๊ะตรวจ ${desks.length + 1}" data-newdesk="${d.id}" />
+          <button class="btn btn-sm" data-daction="adddesk" data-id="${d.id}">เพิ่มโต๊ะ</button>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+$('#dept-manager').addEventListener('click', async (e) => {
+  const btn = e.target.closest('button[data-daction], button[data-kaction]');
+  if (!btn) return;
+  try {
+    if (btn.dataset.kaction === 'del') {
+      await api.deleteDesk(btn.dataset.id); // DELETE /api/desks/:id
+    } else {
+      const id = btn.dataset.id;
+      switch (btn.dataset.daction) {
+        case 'edit': {
+          const d = state.departments.find((x) => x.id === id);
+          const name = prompt('ชื่อแผนกใหม่:', d.name);
+          if (name === null) return;
+          const desc = prompt('คำอธิบายแผนก:', d.description || '');
+          await api.updateDepartment(id, { name: name.trim(), description: desc }); // PUT /api/departments/:id
+          break;
+        }
+        case 'toggle':
+          await api.toggleDepartment(id);
+          break;
+        case 'delete':
+          if (!confirm('ยืนยันการลบแผนกนี้?')) return;
+          await api.deleteDepartment(id); // DELETE /api/departments/:id
+          break;
+        case 'adddesk': {
+          const input = document.querySelector(`input[data-newdesk="${id}"]`);
+          await api.addDesk(id, input.value); // POST /api/desks
+          break;
+        }
+      }
+    }
+    await refresh();
+  } catch (ex) { showToast('เกิดข้อผิดพลาด', ex.message); }
+});
+
+// ---------- (Delete) แบนผู้ใช้ ----------
+function renderUsers() {
+  $('#user-manager').innerHTML = `
+    <table class="tbl">
+      <thead><tr>
+        <th>ชื่อ-นามสกุล</th><th>เบอร์โทร</th><th>เลขบัตร</th><th>ยืนยันตัวตน</th><th>จำนวนคิว</th><th>สถานะ</th><th>การดำเนินการ</th>
+      </tr></thead>
+      <tbody>
+        ${state.patients.map((u) => `
+          <tr>
+            <td>${u.fullName}</td>
+            <td>${u.phone}</td>
+            <td class="meta">${maskNid(u.nationalId)}</td>
+            <td>${u.isVerified ? '✔' : '✘'}</td>
+            <td>${u.queueCount}</td>
+            <td>${u.isBanned ? '<span class="status-badge st-skipped">ถูกแบน</span>' : '<span class="status-badge st-called">ปกติ</span>'}</td>
+            <td>
+              ${u.isBanned
+                ? `<button class="btn btn-sm btn-outline" data-uaction="unban" data-id="${u.id}">ปลดแบน</button>`
+                : `<button class="btn btn-sm btn-danger" data-uaction="ban" data-id="${u.id}">แบน</button>`}
+            </td>
+          </tr>`).join('') || '<tr><td colspan="7" class="meta center">ยังไม่มีผู้ป่วยลงทะเบียน</td></tr>'}
+      </tbody>
+    </table>`;
+}
+
+$('#user-manager').addEventListener('click', async (e) => {
+  const btn = e.target.closest('button[data-uaction]');
+  if (!btn) return;
+  const ban = btn.dataset.uaction === 'ban';
+  if (ban && !confirm('ยืนยันการแบนผู้ใช้นี้? (คิวที่ค้างอยู่จะถูกยกเลิก)')) return;
+  await api.setUserBanned(btn.dataset.id, ban); // PATCH /api/users/:id/ban
+  await refresh();
+});
+
+// ---------- โหมดสาธิต: Admin เรียก/จบคิวอัตโนมัติทุก 6 วิ ----------
+let demoTimer = null;
+$('#demo-mode').addEventListener('change', (e) => {
+  clearInterval(demoTimer); demoTimer = null;
+  if (e.target.checked) {
+    demoTimer = setInterval(async () => {
+      for (const d of state.departments) {
+        const called = state.queues.find((q) => q.departmentId === d.id && q.status === 'called');
+        if (called) {
+          await api.updateQueueStatus(called.id, 'completed');
+        } else {
+          const next = state.queues
+            .filter((q) => q.departmentId === d.id && q.status === 'waiting')
+            .sort((a, b) => numOf(a) - numOf(b))[0];
+          if (next) await api.updateQueueStatus(next.id, 'called');
+        }
+      }
+      await refresh();
+    }, 6000);
+  }
+});
+
+showView('view-auth');
+</script>
+</body>
+</html>

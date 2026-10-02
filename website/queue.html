@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ดูคิว — Q-Care</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container nav">
+    <a class="brand" href="index.html">Q<em>-Care</em></a>
+    <nav class="nav-actions">
+      <a class="btn-nav ghost" href="patient.html">จองคิว</a>
+      <a class="btn-nav" href="queue.html">ดูคิว</a>
+      <span class="nav-user" id="nav-user"></span>
+      <button class="btn-nav ghost" id="btn-logout" type="button">ออกจากระบบ</button>
+    </nav>
+  </div>
+</header>
+
+<main class="content container narrow">
+
+  <!-- คิวของฉัน (Real-time + แจ้งเตือน) -->
+  <div class="card" id="my-queue-card"></div>
+
+  <!-- กระดานคิว + ประวัติ -->
+  <div class="card">
+    <p style="font-weight:700;"><span class="live-dot"></span>สถานะคิวแต่ละแผนก (Real-time)</p>
+    <p class="meta" style="margin:4px 0 8px;">อัปเดตล่าสุด: <span id="last-updated">-</span> · ดึงข้อมูลใหม่ทุก 2.5 วินาที</p>
+    <div id="dept-board"></div>
+    <button id="btn-history" class="btn btn-outline" type="button">ดูประวัติการจองคิว</button>
+    <div id="history-box" class="hidden" style="margin-top:12px;"></div>
+  </div>
+</main>
+
+<footer>Q-Care — Smart Hospital Queue Management · Prototype สำหรับการศึกษา</footer>
+<div id="toast-wrap"></div>
+
+<script src="js/data.js"></script>
+<script src="js/queue.js"></script>
+</body>
+</html>

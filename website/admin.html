@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Admin Dashboard — Q-Care</title>
+<link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container nav">
+    <a class="brand" href="index.html">Q<em>-Care</em></a>
+    <nav class="nav-actions">
+      <label class="nav-user"><input type="checkbox" id="demo-mode" style="width:auto;" /> โหมดสาธิตเรียกคิวอัตโนมัติ</label>
+      <span class="nav-user" id="nav-admin"></span>
+      <button class="btn-nav ghost" id="btn-logout" type="button">ออกจากระบบ</button>
+    </nav>
+  </div>
+</header>
+
+<main class="content container">
+
+  <!-- (Read) Dashboard ภาพรวม -->
+  <div class="card">
+    <div class="sec-title">ภาพรวมผู้ป่วยในระบบ (วันนี้)</div>
+    <div class="stats-grid" id="stats"></div>
+  </div>
+
+  <!-- (Update/Delete) จัดการคิว -->
+  <div class="card">
+    <div class="sec-title">จัดการคิว — เรียกคิว / เสร็จสิ้น / ข้ามคิว / ยกเลิก</div>
+    <select id="admin-dept-filter" class="small"></select>
+    <div class="tbl-wrap" style="margin-top:10px;" id="admin-queues"></div>
+  </div>
+
+  <!-- (CRUD) แผนก + โต๊ะตรวจ -->
+  <div class="card">
+    <div class="sec-title">จัดการแผนกและโต๊ะตรวจ (CRUD)</div>
+    <div class="inline-form">
+      <input id="dept-new-name" type="text" placeholder="ชื่อแผนกใหม่" />
+      <input id="dept-new-prefix" type="text" maxlength="1" placeholder="ตัวอักษรคิว (A-Z)" style="max-width:130px;" />
+      <button id="btn-add-dept" class="btn btn-sm" type="button" style="margin-top:0;">เพิ่มแผนก</button>
+    </div>
+    <p id="dept-error" class="error-msg" style="text-align:left;"></p>
+    <div id="dept-manager" style="margin-top:12px;"></div>
+  </div>
+
+  <!-- (Delete) แบนผู้ใช้ -->
+  <div class="card">
+    <div class="sec-title">จัดการผู้ใช้ — แบนผู้ใช้ที่จองคิวเล่นซ้ำซาก</div>
+    <div class="tbl-wrap" id="user-manager"></div>
+  </div>
+</main>
+
+<footer>Q-Care — Smart Hospital Queue Management · Prototype สำหรับการศึกษา</footer>
+<div id="toast-wrap"></div>
+
+<script src="js/data.js"></script>
+<script src="js/admin.js"></script>
+</body>
+</html>
